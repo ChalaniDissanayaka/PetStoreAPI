@@ -4,12 +4,14 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 
 from .db import pet_items
+from .schemas import PetItemSchema, PetItemUpdateSchema
 
 blp = Blueprint("PetItems", __name__, description="Operations on pet items")
 
 
 @blp.route("/pet_item/<string:pet_item_id>")
 class PetItem(MethodView):
+    @blp.response(200, PetItemSchema)
     def get(self, pet_item_id):
         try:
             return pet_items[pet_item_id]
@@ -23,17 +25,12 @@ class PetItem(MethodView):
         except KeyError:
             abort(404, message="Pet Item not found.")
 
-    def put(self, pet_item_id):
-        pet_item_data = request.get_json()
-
-        if "price" not in pet_item_data or "item_name" not in pet_item_data:
-            abort(
-                400,
-                message="Bad request. Ensure 'price' and 'item_name' are included in the JSON payload.",
-            )
+    @blp.arguments(PetItemUpdateSchema)
+    @blp.response(200, PetItemSchema)
+    def put(self, pet_item_data, pet_item_id):   # pet_item_data must be before pet_item_id, The URL argument come in at the end. The injected arguments are passed first.
         try:
             pet_item = pet_items[pet_item_id]
-            pet_item |= pet_item_data
+            pet_item |= pet_item_data  # |= update operator
 
             return pet_item
         except KeyError:
@@ -42,22 +39,13 @@ class PetItem(MethodView):
 
 @blp.route("/pet_item")
 class PetItemList(MethodView):
+    @blp.response(200, PetItemSchema(many=True))
     def get(self):
-        return {"pet_items": list(pet_items.values())}
+        return pet_items.values()
 
-    def post(self):
-        pet_item_data = request.get_json()
-
-        if (
-            "price" not in pet_item_data
-            or "store_id" not in pet_item_data
-            or "item_name" not in pet_item_data
-            or "item_description" not in pet_item_data
-        ):
-            abort(
-                400,
-                message="Bad request. Ensure 'price', 'store_id', 'item_name' and 'item_description' are included in the JSON payload.",
-            )
+    @blp.arguments(PetItemSchema)
+    @blp.response(201, PetItemSchema)
+    def post(self, pet_item_data):
         for pet_item in pet_items.values():
             if (
                 pet_item_data["item_name"] == pet_item["item_name"]
