@@ -1,10 +1,10 @@
-import uuid
-from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from sqlalchemy.exc import SQLAlchemyError
 
-from .db import pet_items
-from .schemas import PetItemSchema, PetItemUpdateSchema
+from ..init import db
+from ..models.petitem import PetItemModel
+from ..schemas import PetItemSchema, PetItemUpdateSchema
 
 blp = Blueprint("PetItems", __name__, description="Operations on pet items")
 
@@ -13,48 +13,48 @@ blp = Blueprint("PetItems", __name__, description="Operations on pet items")
 class PetItem(MethodView):
     @blp.response(200, PetItemSchema)
     def get(self, pet_item_id):
-        try:
-            return pet_items[pet_item_id]
-        except KeyError:
-            abort(404, message="Pet Item not found.")
+        pet_item = PetItemModel.query.get_or_404(pet_item_id)
+        return pet_item
 
     def delete(self, pet_item_id):
-        try:
-            del pet_items[pet_item_id]
-            return {"message": "Pet Item deleted."}
-        except KeyError:
-            abort(404, message="Pet Item not found.")
+        pet_item = PetItemModel.query.get_or_404(pet_item_id)
+        db.session.delete(pet_item)
+        db.session.commit()
+        return {"message": "Pet Item deleted."}, 200
 
     @blp.arguments(PetItemUpdateSchema)
     @blp.response(200, PetItemSchema)
     def put(self, pet_item_data, pet_item_id):   # pet_item_data must be before pet_item_id, The URL argument come in at the end. The injected arguments are passed first.
-        try:
-            pet_item = pet_items[pet_item_id]
-            pet_item |= pet_item_data  # |= update operator
+        pet_item = PetItemModel.query.get(pet_item_id)
 
-            return pet_item
-        except KeyError:
-            abort(404, message="Pet Item not found.")
+        if pet_item:
+            pet_item.price = pet_item_data["price"]
+            pet_item.item_name = pet_item_data["item_name"]
+            pet_item.item_description = pet_item_data["item_description"]
+        else:
+            pet_item = PetItemModel(id=pet_item_id, **pet_item_data)
+
+        db.session.add(pet_item)
+        db.session.commit()
+
+        return pet_item
 
 
 @blp.route("/pet_item")
 class PetItemList(MethodView):
     @blp.response(200, PetItemSchema(many=True))
     def get(self):
-        return pet_items.values()
+        return PetItemModel.query.all()
 
     @blp.arguments(PetItemSchema)
     @blp.response(201, PetItemSchema)
     def post(self, pet_item_data):
-        for pet_item in pet_items.values():
-            if (
-                pet_item_data["item_name"] == pet_item["item_name"]
-                and pet_item_data["store_id"] == pet_item["store_id"]
-            ):
-                abort(400, message=f"Pet Item already exists.")
+        pet_item = PetItemModel(**pet_item_data)
 
-        item_id = uuid.uuid4().hex
-        pet_item = {**pet_item_data, "id": item_id}
-        pet_items[item_id] = pet_item
+        try:
+            db.session.add(pet_item)
+            db.session.commit()
+        except SQLAlchemyError:
+            abort(500, message="An error occurred while inserting the pet item.")
 
         return pet_item
