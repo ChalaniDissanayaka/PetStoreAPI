@@ -65,3 +65,236 @@ These user stories outline the essential functionalities required for both Admin
 
 Trello Board URL -
 https://trello.com/b/V7dw2MOe/pet-shop-flask-api
+
+
+### PET STORE API using Flask, PostgreSQL Database and JWT.
+
+activate python virtual environment:
+```
+source .venv/bin/activate
+```
+
+How to install requirements:
+```
+pip install -r requirements.txt
+```
+How to add list of all the installed packages with their corresponding versions in the Python environment to requirements.txt
+```
+pip freeze > requirements.txt
+```
+
+OPENAPI SWAGGER UI PATH
+```
+http://127.0.0.1:5000/swagger-ui
+```
+
+### Pet Store REST API
+### stores 
+#### Operations on pet stores
+HTTP verb
+### POST
+Path or route
+```
+/store
+```
+Any required body data
+#### Request body
+```
+{
+  "store_name": "string",
+  "store_location": "string"
+}
+```
+#### Example Request body
+```
+{
+	"store_name": "PetHeaven",
+	"store_location": "Melboure"
+}
+```
+#### Response
+Code 201 Created
+
+```
+{
+  "id": 0,
+  "store_name": "string",
+  "store_location": "string",
+  "petitems": [
+    {
+      "id": "string",
+      "item_name": "string",
+      "item_description": "string",
+      "price": 0
+    }
+  ]
+}
+```
+#### Example Response
+```
+{
+	"id": 4,
+	"store_name": "PetHeaven",
+	"store_location": "Melboure",
+	"petitems": [
+		{
+			"id": "4",
+			"item_description": "Food and Water Dispenser",
+			"item_name": "Food and Water Bowl",
+			"price": 17.5
+		}
+	]
+}
+```
+HTTP verb
+### GET
+Path or route
+```
+/store
+```
+#### Response
+Code 200 OK
+```
+[
+  {
+    "id": 0,
+    "store_name": "string",
+    "store_location": "string",
+    "petitems": [
+      {
+        "id": "string",
+        "item_name": "string",
+        "item_description": "string",
+        "price": 0
+      }
+    ]
+  }
+]
+```
+#### Example Response
+```
+[
+	{
+		"id": 1,
+		"petitems": [
+			{
+				"id": "1",
+				"item_description": "German Shepherd belt",
+				"item_name": "Dog belt",
+				"price": 35.0
+			}
+		],
+		"store_location": "Melbourne",
+		"store_name": "Chilly"
+	},
+	{
+		"id": 2,
+		"petitems": [
+			{
+				"id": "2",
+				"item_description": "Bird feeding stand",
+				"item_name": "Bird feeder",
+				"price": 42.5
+			}
+		],
+		"store_location": "Brisbane",
+		"store_name": "HappyPet"
+	},
+	{
+		"id": 4,
+		"petitems": [
+			{
+				"id": "4",
+				"item_description": "Food and Water Dispenser",
+				"item_name": "Food and Water Bowl",
+				"price": 17.5
+			}
+		],
+		"store_location": "Melboure",
+		"store_name": "PetHeaven"
+	}
+]
+```
+
+HTTP verb
+### GET
+Path or route
+```
+/store/{store_id}
+```
+#### Example Path
+```
+/store/4
+```
+#### Response
+#### When Successful
+Code 200 OK
+```
+{
+  "id": 0,
+  "store_name": "string",
+  "store_location": "string",
+  "petitems": [
+    {
+      "id": "string",
+      "item_name": "string",
+      "item_description": "string",
+      "price": 0
+    }
+  ]
+}
+```
+#### Example Response
+```
+{
+	"id": 4,
+	"petitems": [
+		{
+			"id": "4",
+			"item_description": "Food and Water Dispenser",
+			"item_name": "Food and Water Bowl",
+			"price": 17.5
+		}
+	],
+	"store_location": "Melboure",
+	"store_name": "PetHeaven"
+}
+```
+#### Response
+#### When Not Found
+#### Code 404 NOT FOUND
+```
+{
+	"code": 404,
+	"status": "Not Found"
+}
+```
+
+HTTP verb
+### DELETE
+Path or route
+```
+/store/{store_id}
+```
+#### Example Path
+```
+/store/4
+```
+#### Response
+#### When Successful
+#### Code 200 OK 
+```
+{
+	"message": "Pet Store deleted"
+}
+
+```
+#### Response
+#### When Not Found
+#### Code 404 NOT FOUND
+```
+{
+	"code": 404,
+	"status": "Not Found"
+}
+```
