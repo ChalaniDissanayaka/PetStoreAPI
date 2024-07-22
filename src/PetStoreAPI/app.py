@@ -5,11 +5,13 @@ from flask_smorest import Api
 
 from .models.petitem import PetItemModel
 from .models.store import StoreModel
+from .models.badge import BadgeModel
 
 from .init import db
 
 from .controllers.pet_item_controller import blp as PetItemBlueprint
 from .controllers.store_controller import blp as StoreBlueprint
+from .controllers.badge_controller import blp as BadgeBlueprint
 
 
 def create_app():
@@ -34,5 +36,6 @@ def create_app():
 
     api.register_blueprint(PetItemBlueprint)
     api.register_blueprint(StoreBlueprint)
+    api.register_blueprint(BadgeBlueprint)
 
     return app
