@@ -9,3 +9,4 @@ class StoreModel(db.Model):
     store_location = db.Column(db.String(100), unique=True, nullable=False)
 
     petitems = db.relationship("PetItemModel", back_populates="store", lazy="dynamic", cascade="all, delete")
+    badges = db.relationship("BadgeModel", back_populates="store", lazy="dynamic")
