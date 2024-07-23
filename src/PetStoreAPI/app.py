@@ -6,6 +6,7 @@ from flask_smorest import Api
 from .models.petitem import PetItemModel
 from .models.store import StoreModel
 from .models.badge import BadgeModel
+from .models.petitems_badges import PetItemBadgeModel
 
 from .init import db
 

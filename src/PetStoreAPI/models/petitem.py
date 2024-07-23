@@ -11,3 +11,4 @@ class PetItemModel(db.Model):
     store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), unique=False, nullable=False)
 
     store = db.relationship("StoreModel", back_populates="petitems")
+    badges = db.relationship("BadgeModel", back_populates="petitems", secondary="petitems_badges")
