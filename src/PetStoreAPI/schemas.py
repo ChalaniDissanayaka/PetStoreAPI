@@ -31,6 +31,7 @@ class PetItemUpdateSchema(Schema):
 class PetItemSchema(PlainPetItemSchema):
     store_id = fields.Int(required=True, load_only=True)
     store = fields.Nested(PlainStoreSchema(), dump_only=True)
+    badges = fields.List(fields.Nested(PlainBadgeSchema()), dump_only=True)
 
 
 class StoreSchema(PlainStoreSchema):
@@ -41,3 +42,10 @@ class StoreSchema(PlainStoreSchema):
 class BadgeSchema(PlainBadgeSchema):
     store_id = fields.Int(load_only=True)
     store = fields.Nested(PlainStoreSchema(), dump_only=True)
+    petitems = fields.List(fields.Nested(PlainPetItemSchema()), dump_only=True)
+
+
+class BadgeAndPetItemSchema(Schema):
+    message = fields.Str()
+    petitem = fields.Nested(PetItemSchema)
+    badge = fields.Nested(BadgeSchema)
