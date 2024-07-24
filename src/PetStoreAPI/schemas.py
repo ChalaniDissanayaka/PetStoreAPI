@@ -49,3 +49,9 @@ class BadgeAndPetItemSchema(Schema):
     message = fields.Str()
     petitem = fields.Nested(PetItemSchema)
     badge = fields.Nested(BadgeSchema)
+
+
+class UserSchema(Schema):
+    id = fields.Int(dump_only=True)
+    username = fields.Str(required=True)
+    password = fields.Str(required=True, load_only=True)

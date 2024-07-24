@@ -13,7 +13,7 @@ from ..schemas import BadgeAndPetItemSchema
 blp = Blueprint("Badges", "badges", description="Operations on badges")
 
 
-@blp.route("/store/<string:store_id>/badge")
+@blp.route("/store/<int:store_id>/badge")
 class BadgesInStore(MethodView):
     @blp.response(200, BadgeSchema(many=True))
     def get(self, store_id):
@@ -41,7 +41,7 @@ class BadgesInStore(MethodView):
         return badge
 
 
-@blp.route("/pet_item/<string:pet_item_id>/badge/<string:badge_id>")
+@blp.route("/pet_item/<int:pet_item_id>/badge/<int:badge_id>")
 class AddBadgesToPetItem(MethodView):
     @blp.response(201, BadgeSchema)
     def post(self, pet_item_id, badge_id):
@@ -74,7 +74,7 @@ class AddBadgesToPetItem(MethodView):
         return {"message": "Pet Item removed from the badge", "pet item": pet_item, "badge": badge}
 
 
-@blp.route("/badge/<string:badge_id>")
+@blp.route("/badge/<int:badge_id>")
 class Badge(MethodView):
     @blp.response(200, BadgeSchema)
     def get(self, badge_id):

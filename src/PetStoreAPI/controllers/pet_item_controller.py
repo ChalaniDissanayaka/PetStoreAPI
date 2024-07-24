@@ -9,7 +9,7 @@ from ..schemas import PetItemSchema, PetItemUpdateSchema
 blp = Blueprint("PetItems", __name__, description="Operations on pet items")
 
 
-@blp.route("/pet_item/<string:pet_item_id>")
+@blp.route("/pet_item/<int:pet_item_id>")
 class PetItem(MethodView):
     @blp.response(200, PetItemSchema)
     def get(self, pet_item_id):
