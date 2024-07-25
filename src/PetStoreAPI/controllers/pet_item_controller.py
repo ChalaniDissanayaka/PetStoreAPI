@@ -1,5 +1,6 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from flask_jwt_extended import jwt_required, get_jwt
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..init import db
@@ -11,12 +12,18 @@ blp = Blueprint("PetItems", __name__, description="Operations on pet items")
 
 @blp.route("/pet_item/<int:pet_item_id>")
 class PetItem(MethodView):
+    @jwt_required()
     @blp.response(200, PetItemSchema)
     def get(self, pet_item_id):
         pet_item = PetItemModel.query.get_or_404(pet_item_id)
         return pet_item
 
+    @jwt_required()
     def delete(self, pet_item_id):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required")
+
         pet_item = PetItemModel.query.get_or_404(pet_item_id)
         db.session.delete(pet_item)
         db.session.commit()
@@ -42,10 +49,12 @@ class PetItem(MethodView):
 
 @blp.route("/pet_item")
 class PetItemList(MethodView):
+    @jwt_required()
     @blp.response(200, PetItemSchema(many=True))
     def get(self):
         return PetItemModel.query.all()
 
+    @jwt_required()
     @blp.arguments(PetItemSchema)
     @blp.response(201, PetItemSchema)
     def post(self, pet_item_data):
