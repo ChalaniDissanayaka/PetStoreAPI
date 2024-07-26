@@ -1,5 +1,6 @@
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from flask_jwt_extended import jwt_required, get_jwt
 from sqlalchemy.exc import SQLAlchemyError
 
 from ..init import db
@@ -15,15 +16,21 @@ blp = Blueprint("Badges", "badges", description="Operations on badges")
 
 @blp.route("/store/<int:store_id>/badge")
 class BadgesInStore(MethodView):
+    @jwt_required()
     @blp.response(200, BadgeSchema(many=True))
     def get(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
 
         return store.badges.all()
 
+    @jwt_required()
     @blp.arguments(BadgeSchema)
     @blp.response(201, BadgeSchema)
     def post(self, badge_data, store_id):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required")
+
         if BadgeModel.query.filter(BadgeModel.store_id == store_id, BadgeModel.badge_name == badge_data["badge_name"]).first():
             abort(400, message="A badge with the provided name already exists in the pet store.")
 
@@ -43,8 +50,13 @@ class BadgesInStore(MethodView):
 
 @blp.route("/pet_item/<int:pet_item_id>/badge/<int:badge_id>")
 class AddBadgesToPetItem(MethodView):
+    @jwt_required()
     @blp.response(201, BadgeSchema)
     def post(self, pet_item_id, badge_id):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required")
+
         pet_item = PetItemModel.query.get_or_404(pet_item_id)
         badge = BadgeModel.query.get_or_404(badge_id)
 
@@ -58,8 +70,13 @@ class AddBadgesToPetItem(MethodView):
 
         return badge
 
+    @jwt_required()
     @blp.response(200, BadgeAndPetItemSchema)
     def delete(self, pet_item_id, badge_id):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required")
+
         pet_item = PetItemModel.query.get_or_404(pet_item_id)
         badge = BadgeModel.query.get_or_404(badge_id)
 
@@ -76,11 +93,13 @@ class AddBadgesToPetItem(MethodView):
 
 @blp.route("/badge/<int:badge_id>")
 class Badge(MethodView):
+    @jwt_required()
     @blp.response(200, BadgeSchema)
     def get(self, badge_id):
         badge = BadgeModel.query.get_or_404(badge_id)
         return badge
 
+    @jwt_required()
     @blp.response(
         202,
         description="Deletes a badge if no pet item is attached with it.",
@@ -92,6 +111,10 @@ class Badge(MethodView):
         description="Returned if the badge is assigned to one or more pet items. In this scenario, the badge is not deleted.",
     )
     def delete(self, badge_id):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required")
+
         badge = BadgeModel.query.get_or_404(badge_id)
 
         if not badge.petitems:

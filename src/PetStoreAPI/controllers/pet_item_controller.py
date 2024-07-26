@@ -29,9 +29,14 @@ class PetItem(MethodView):
         db.session.commit()
         return {"message": "Pet Item deleted."}, 200
 
+    @jwt_required()
     @blp.arguments(PetItemUpdateSchema)
     @blp.response(200, PetItemSchema)
     def put(self, pet_item_data, pet_item_id):   # pet_item_data must be before pet_item_id, The URL argument come in at the end. The injected arguments are passed first.
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required")
+
         pet_item = PetItemModel.query.get(pet_item_id)
 
         if pet_item:
@@ -58,6 +63,10 @@ class PetItemList(MethodView):
     @blp.arguments(PetItemSchema)
     @blp.response(201, PetItemSchema)
     def post(self, pet_item_data):
+        jwt = get_jwt()
+        if not jwt.get("is_admin"):
+            abort(401, message="Admin privilege required")
+
         pet_item = PetItemModel(**pet_item_data)
 
         try:

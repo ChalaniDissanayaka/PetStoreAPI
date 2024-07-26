@@ -56,8 +56,8 @@ def create_app():
 
     @jwt.additional_claims_loader
     def add_claims_to_jwt(identity):
-        if identity == 1:
-            return {"is_admin": True}  # I assumed the User with ID = 1 is the administrator.
+        if identity < 4:
+            return {"is_admin": True}  # I assumed the User with ID = 1 or 2 or 3 is the administrator.
         return {"is_admin": False}
 
     @jwt.expired_token_loader

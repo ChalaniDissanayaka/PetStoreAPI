@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from passlib.hash import pbkdf2_sha256
@@ -7,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..init import db
 from ..models.user import UserModel
 
-from ..schemas import UserSchema
+from ..schemas import UserSchema, UserUpdateSchema
 
 from ..blocklist import BLOCKLIST
 
@@ -39,11 +41,30 @@ class User(MethodView):
     The following endpoints are not expose to public users.
     """
 
+    @jwt_required()
     @blp.response(200, UserSchema)
     def get(self, user_id):
         user = UserModel.query.get_or_404(user_id)
         return user
 
+    @jwt_required()
+    @blp.arguments(UserUpdateSchema)
+    @blp.response(200, UserSchema)
+    def put(self, user_data, user_id):
+        user = UserModel.query.get_or_404(user_id)
+
+        if user:
+            user.username = user_data["username"]
+            user.password = pbkdf2_sha256.hash(user_data["password"])
+        else:
+            user = UserModel(id=user_id, **user_data)
+
+        db.session.add(user)
+        db.session.commit()
+
+        return user
+
+    @jwt_required()
     def delete(self, user_id):
         user = UserModel.query.get_or_404(user_id)
         db.session.delete(user)
@@ -60,7 +81,7 @@ class UserLogin(MethodView):
         ).first()
 
         if user and pbkdf2_sha256.verify(user_data["password"], user.password):
-            access_token = create_access_token(identity=user.id)
+            access_token = create_access_token(identity=user.id, expires_delta=timedelta(days=1))
             return {"access_token": access_token}, 200
 
         abort(401, message="Invalid credentials.")
