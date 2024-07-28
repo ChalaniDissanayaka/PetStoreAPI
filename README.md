@@ -378,7 +378,10 @@ It offers robust features for ORM, query construction and session management. It
 
 ### Database design BEFORE coding started - The project planning phase.
 
-attach the diagram here. 
+## Entity Relationship Diagram (ERD) for Pet Store REST API.
+
+![ER_diagram](./docs/PetStoreAPI_ER.png)
+
 
 ### Entities
 
@@ -570,15 +573,81 @@ class UserModel(db.Model):
     password = db.Column(db.String, nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
 ```
-#### One-to-many Relationship between Stores and Users
-
-   - One Store can have many Users
-   - Each User has one Store
+#### UserModel
+   
+   - UserModel helps with User Authentication and User Authorization.
+   - The SQLAlchemy model. UserModel interact with the database.
+   - Receive username and password from the client (JSON format)
+   - Check if a user with that username already exists
+   - if username not exists then hash the password and add new UserModel to the database. 
+   - Return a success message. 
 
 ## R8: Explain how to use Pet Store REST API endpoints. Each endpoint should be explained.
+## users
+#### Operations on users
+HTTP verb
+### POST
+Path or route
+```
+/register
+```
+Any required body data
+#### Request body
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+#### Example Request body
+```json
+{
+	"username": "tom",
+	"password": "123456"
+}
+```
+#### Response
+Code 201 Created
+
+#### Example Response
+```json
+{
+	"message": "User created successfully."
+}
+```
+
+HTTP verb
+### POST
+Path or route
+```
+/login
+```
+Any required body data
+#### Request body
+```json
+{
+  "username": "string",
+  "password": "string"
+}
+```
+#### Example Request body
+
+```json
+{
+  "username": "Admin",
+  "password": "123456"
+}
+```
+#### Response
+Code 200 OK
+```json
+{
+	"access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcyMjE0NTE1MSwianRpIjoiOGVhMTRmOTUtZjQxYi00ZDU2LWFjZmItZDZlMjU5Y2U2NDYyIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MywibmJmIjoxNzIyMTQ1MTUxLCJjc3JmIjoiMDY5OGFhYWMtNzIwZi00MzdhLWEwOTUtNWM5MDgxMWIwMjExIiwiZXhwIjoxNzIyMjMxNTUxLCJpc19hZG1pbiI6dHJ1ZX0.G8SppfNt0kWsCuWBlPdpKRUtmPECjfWSsc01pvQvsIs"
+}
+```
 
 ## stores 
-#### Operations on pet stores
+#### Operations on pet stores - jwt token required
 
 HTTP verb
 ### POST
@@ -628,6 +697,7 @@ Code 201 Created
 }
 ```
 #### Example Response
+Code 201 Created
 ```json
 {
 	"badges": [],
@@ -671,6 +741,7 @@ Code 200 OK
 ]
 ```
 #### Example Response
+Code 200 OK
 ```json
 
 [
@@ -787,6 +858,7 @@ Code 200 OK
 }
 ```
 #### Example Response
+Code 200 OK
 ```json
 {
 	"badges": [
@@ -867,7 +939,7 @@ Path or route
 ```
 /store/4
 ```
-#### Response
+#### Example Response
 #### When Successful
 #### Code 200 OK 
 ```json
@@ -878,6 +950,311 @@ Path or route
 ```
 #### Response
 #### When Not Found
+#### Code 404 NOT FOUND
+```json
+{
+	"code": 404,
+	"status": "Not Found"
+}
+```
+
+## PetItems
+#### Operations on pet items - jwt token required
+
+HTTP verb
+### POST
+Path or route
+```
+/pet_item
+```
+#### Example Path
+```
+/pet_item
+```
+#### Response
+#### When Successful
+Code 201 CREATED
+Any required body data
+#### Request body
+```json
+{
+  "item_name": "string",
+  "item_description": "string",
+  "price": 0,
+  "store_id": 0
+}
+```
+#### Example Request Body
+```json
+{
+	"store_id": 2,
+	"item_description": "Zoo Bamboo Grooming Brush",
+	"item_name": "Dog Grooming Brush",
+	"price": 37.50
+}
+```
+#### Example Response - When we have a valid token
+#### When Successful
+#### Code 201 CREATED
+```json
+{
+	"badges": [],
+	"id": 12,
+	"item_description": "Zoo Bamboo Grooming Brush",
+	"item_name": "Dog Grooming Brush",
+	"price": 37.5,
+	"store": {
+		"id": 2,
+		"store_location": "Brisbane",
+		"store_name": "HappyPet"
+	}
+}
+```
+
+HTTP verb
+### GET
+Path or route
+```
+/pet_item
+```
+#### Example Path
+```
+/pet_item
+```
+#### Response
+#### When Successful
+Code 200 OK
+```json
+[
+  {
+    "id": 0,
+    "item_name": "string",
+    "item_description": "string",
+    "price": 0,
+    "store": {
+      "id": 0,
+      "store_name": "string",
+      "store_location": "string"
+    },
+    "badges": [
+      {
+        "id": 0,
+        "badge_name": "string",
+        "colour_code": "string",
+        "discount": 0
+      }
+    ]
+  }
+]
+```
+#### Example Response - When token expired
+Code 401 UNAUTHORIZED
+```json
+{
+	"error": "token_expired",
+	"message": "The token has expired."
+}
+```
+#### Example Response - When we have a new token
+#### When Successful
+#### Code 200 OK
+```json
+[
+	{
+		"badges": [
+			{
+				"badge_name": "Bird food items",
+				"colour_code": "Orange",
+				"discount": 15.0,
+				"id": 1
+			}
+		],
+		"id": 2,
+		"item_description": "Bird feeding stand",
+		"item_name": "Bird feeder",
+		"price": 42.5,
+		"store": {
+			"id": 2,
+			"store_location": "Brisbane",
+			"store_name": "HappyPet"
+		}
+	},
+	{
+		"badges": [],
+		"id": 7,
+		"item_description": "Pet Swimming assist",
+		"item_name": "Pet Swimming assist",
+		"price": 17.5,
+		"store": {
+			"id": 2,
+			"store_location": "Brisbane",
+			"store_name": "HappyPet"
+		}
+	},
+	{
+		"badges": [],
+		"id": 8,
+		"item_description": "Bird feed food item",
+		"item_name": "Bird feed food",
+		"price": 77.5,
+		"store": {
+			"id": 2,
+			"store_location": "Brisbane",
+			"store_name": "HappyPet"
+		}
+	},
+	{
+		"badges": [],
+		"id": 1,
+		"item_description": "German Shepherd belt",
+		"item_name": "Dog belt",
+		"price": 29.75,
+		"store": {
+			"id": 1,
+			"store_location": "Melbourne",
+			"store_name": "Chilly"
+		}
+	},
+	{
+		"badges": [],
+		"id": 11,
+		"item_description": "Magic Nail Clipper Small/ Medium",
+		"item_name": "Nail Clipper",
+		"price": 57.5,
+		"store": {
+			"id": 2,
+			"store_location": "Brisbane",
+			"store_name": "HappyPet"
+		}
+	}
+]
+```
+HTTP verb
+### GET
+Path or route
+```
+/pet_item/{pet_item_id}
+```
+#### Example Path
+```
+/pet_item/2
+```
+#### Response
+#### When Successful
+Code 200 OK
+```json
+{
+  "id": 0,
+  "item_name": "string",
+  "item_description": "string",
+  "price": 0,
+  "store": {
+    "id": 0,
+    "store_name": "string",
+    "store_location": "string"
+  },
+  "badges": [
+    {
+      "id": 0,
+      "badge_name": "string",
+      "colour_code": "string",
+      "discount": 0
+    }
+  ]
+}
+```
+#### Example Response - When we have a new token
+#### When Successful
+#### Code 200 OK
+```json
+{
+	"badges": [
+		{
+			"badge_name": "Bird food items",
+			"colour_code": "Orange",
+			"discount": 15.0,
+			"id": 1
+		}
+	],
+	"id": 2,
+	"item_description": "Bird feeding stand",
+	"item_name": "Bird feeder",
+	"price": 42.5,
+	"store": {
+		"id": 2,
+		"store_location": "Brisbane",
+		"store_name": "HappyPet"
+	}
+}
+```
+HTTP verb
+### PUT
+Path or route
+```
+/pet_item/{pet_item_id}
+```
+Any required body data
+#### Request body
+```json
+{
+  "item_name": "string",
+  "item_description": "string",
+  "price": 0,
+  "store_id": 0
+}
+```
+#### Example Path
+```
+/pet_item/1
+```
+HTTP verb
+### PUT
+
+Any required body data
+#### Request body
+```json
+{
+  "item_name": "Dog belt",
+  "item_description": "Seeing eye dog belt",
+  "price": 85.00
+}
+```
+#### Example Response - When we have a valid token
+#### When Successful
+Code 200 OK
+```json
+{
+	"badges": [],
+	"id": 1,
+	"item_description": "Seeing eye dog belt",
+	"item_name": "Dog belt",
+	"price": 85.0,
+	"store": {
+		"id": 1,
+		"store_location": "Melbourne",
+		"store_name": "Chilly"
+	}
+}
+```
+HTTP verb
+### DELETE
+Path or route
+```
+/pet_item/{pet_item_id}
+```
+#### Example Path
+```
+/pet_item/8
+```
+#### Example Response
+#### When Successful
+#### Code 200 OK 
+```json
+{
+	"message": "Pet Item deleted."
+}
+```
+#### When Not found
 #### Code 404 NOT FOUND
 ```json
 {
