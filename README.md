@@ -1,19 +1,124 @@
-FUNCTIONALITY AND FEATURES OF THE PET STORE API
+## T2A2 - PET STORE API - Chalani Dissanayaka
+
+### Flask PET STORE API Developed as a part of Coder Academy T2A2 Assignment
+
+GitHub Repository
+https://github.com/ChalaniDissanayaka/PetStoreAPI
+
+Trello Board URL 
+https://trello.com/b/V7dw2MOe/pet-shop-flask-api
+
+
+### PET STORE API using Flask, PostgreSQL Database and JWT.
+### Set up instructions for python environment, PostgreSQL Database and run the PET STORE API 
+
+1. clone the PET STORE API from GitHub repo 
+https://github.com/ChalaniDissanayaka/PetStoreAPI
+
+2. change the directory to /src/PetStoreAPI
+
+3. activate python virtual environment
+
+```
+source .venv/bin/activate
+```
+### installation instructions
+How to install requirements
+
+```
+pip install -r requirements.txt
+```
+How to add list of all the installed packages with their corresponding versions in the Python environment to requirements.txt
+```
+pip freeze > requirements.txt
+```
+How to run PET STORE API
+
+```
+flask run
+```
+
+OPENAPI SWAGGER UI PATH
+```
+http://127.0.0.1:5000/swagger-ui
+```
+
+### Make sure to set up PostgreSQL and .env file before run the PET STORE API
+How to set up PostgreSQL
+
+login to postgres
+```
+psql postgres
+```
+create a database
+```
+CREATE DATABASE petstore_db;
+```
+set the password
+```
+CREATE USER petstore_dev WITH PASSWORD '123456';
+```
+Grant the permission to user to use the database
+```
+GRANT ALL PRIVILEGES ON DATABASE petstore_db TO petstore_dev;
+```
+Grant the schema permission to user
+```
+GRANT ALL ON SCHEMA public TO petstore_dev;
+```
+connect to database
+```
+\c petstore_db
+```
+### How to set up .env file
+create a file called .env in /src/PetStoreAPI
+
+add following lines to the .env file
+```
+DATABASE_URL="postgresql+psycopg2://petstore_dev:123456@localhost:5432/petstore_db"
+JWT_SECRET_KEY="chalani"
+```
+### Testing
+### Admin Accounts
+
+   - User with ID = 1 or 2 or 3 is the administrator. So first 3 users are Admin users. 
+   -  /register endpoint to create a user account
+   -  /login endpoint to get a jwt access_token
+```python
+@jwt.additional_claims_loader
+    def add_claims_to_jwt(identity):
+        if identity < 4:
+            return {"is_admin": True}  # I assumed the User with ID = 1 or 2 or 3 is the administrator.
+        return {"is_admin": False}
+```
+
+## R1: Explain the problem that PET STORE API will solve, and explain how this app solves or addresses the problem.
+
+### Problem Significance for Pet Store API
+
+The motivation to create the PET STORE API came from a personal experience of trying to buy a bird feeder online but being unable to find the desired product without visiting multiple stores. By creating the Pet Shop API, I aim to eliminate such frustrations for other pet owners, offering a seamless and efficient shopping experience that meets their needs conveniently.
+
+The Pet Store API addresses a significant gap in the pet supply market by offering a centralized platform for pet owners to find a store and purchase pet items. Traditional shopping methods often require visiting multiple stores to find specific petitems, which can be time-consuming and inconvenient. The Pet Store API streamlines the process, making it easier for users to locate and buy the petitems they need.
+
+Furthermore, The Pet Store API supports businesses by providing a robust system to manage stores, petitems and promotions effectively using badges. This leads to better user experience, as stores can ensure they have the right petitems available at the right times. It also allows for dynamic marketing strategies, such as applying discounts to specific petitems, which can drive sales and enhance customer satisfaction.
+
+### FUNCTIONALITY AND FEATURES OF THE PET STORE API TO SOLVE THE PROBLEM
 
 ### Admin Features
 
 1. Manage Stores (CRUD Operations)
 
    - Create a Pet Store: Admins can add a new store with name, locations details and contact information.
-   - Read a Pet Store: Admins can view a list of all stores or details of a specific store.
-   - Update a Pet Store: Admins can modify pet store details to keep information up-to-date.
+   - Read a Pet Store: Admins can view a list of all stores.
+   - Read a Pet Store: Admins can view a specific store using store_id.
    - Delete a Pet Store: Admins can remove pet store that are no longer operational.
+   - Admin should unlink all attached petitems before Delete a Pet Store. 
 
 2. Manage Pet Items (CRUD Operations)
 
-   - Create Pet Item: Admins can add new pet items to the inventory. It includes details like name, description, price and pet type (example - Bird, Cat, Dog).
+   - Create Pet Item: Admins can add new pet items to the inventory. It includes details like name, description, price.
    - Read Pet Item: Admins can view a list of all pet items or details of a specific pet item.
-   - Update Pet Item: Admins can update information about pet items. As an example update the description, price or availability.
+   - Update Pet Item: Admins can update information about pet items. As an example update the description, price.
    - Delete Pet Item: Admins can remove pet items from the inventory that are no longer available or needed.
 
 3. Add Discounts Based on Badges
@@ -31,8 +136,6 @@ FUNCTIONALITY AND FEATURES OF THE PET STORE API
    - Browse Pet Items: Customers can view all available pet items in the pet store. Pet store has many items belong to many badges.
    - View Pet Item Details: Customers can see detailed information about a specific pet item. It includes pet item name, description, price and any available discounts. This helps customers make informed decisions about their purchases.
 
-3. Reviews and Ratings
-   - Leave Reviews and Ratings: Customers can leave a feedback and rate pet items they have purchased, sharing their experiences to help other customers make informed decisions.
 
 ### User Stories Overview
 
@@ -61,32 +164,6 @@ FUNCTIONALITY AND FEATURES OF THE PET STORE API
        - Leave reviews and ratings for purchased pet items to share experiences and help other customers.
 
 These user stories outline the essential functionalities required for both Admin and Customer roles within the Pet Store API. Pet Store API is addressing specific actions and facilitate tailored functionalities to each user's needs in managing and interacting with the pet store web application.
-
-
-Trello Board URL -
-https://trello.com/b/V7dw2MOe/pet-shop-flask-api
-
-
-### PET STORE API using Flask, PostgreSQL Database and JWT.
-
-activate python virtual environment:
-```
-source .venv/bin/activate
-```
-
-How to install requirements:
-```
-pip install -r requirements.txt
-```
-How to add list of all the installed packages with their corresponding versions in the Python environment to requirements.txt
-```
-pip freeze > requirements.txt
-```
-
-OPENAPI SWAGGER UI PATH
-```
-http://127.0.0.1:5000/swagger-ui
-```
 
 ## R3: List and explain the third-party services, packages and dependencies used in this app.
 
@@ -279,7 +356,7 @@ The primary purpose of using SQLAlchemy in the Pet Store REST API is to streamli
 
    - Perform Create, Read, Update and Delete (CRUD) operations using SQLAlchemy ORM capabilities.
    - Example - Read operation from User.
-   - ```
+   - ```python
         if UserModel.query.filter(UserModel.username == user_data["username"]).first():
         abort(409, message="A user with that username already exists.")
      ```
@@ -308,6 +385,7 @@ attach the diagram here.
    - Store
    - Badge
    - PetItem
+   - User
 
 ### many-to-many relationship between PetItem and Badge
 1. Relationship between Badges and PetItems
@@ -501,6 +579,7 @@ class UserModel(db.Model):
 
 ## stores 
 #### Operations on pet stores
+
 HTTP verb
 ### POST
 Path or route
@@ -509,14 +588,14 @@ Path or route
 ```
 Any required body data
 #### Request body
-```
+```json
 {
   "store_name": "string",
   "store_location": "string"
 }
 ```
 #### Example Request body
-```
+```json
 {
 	"store_name": "PetHeaven",
 	"store_location": "Melboure"
@@ -525,35 +604,37 @@ Any required body data
 #### Response
 Code 201 Created
 
-```
+```json
 {
   "id": 0,
   "store_name": "string",
   "store_location": "string",
   "petitems": [
     {
-      "id": "string",
+      "id": 0,
       "item_name": "string",
       "item_description": "string",
       "price": 0
+    }
+  ],
+  "badges": [
+    {
+      "id": 0,
+      "badge_name": "string",
+      "colour_code": "string",
+      "discount": 0
     }
   ]
 }
 ```
 #### Example Response
-```
+```json
 {
-	"id": 4,
-	"store_name": "PetHeaven",
+	"badges": [],
+	"id": 6,
+	"petitems": [],
 	"store_location": "Melboure",
-	"petitems": [
-		{
-			"id": "4",
-			"item_description": "Food and Water Dispenser",
-			"item_name": "Food and Water Bowl",
-			"price": 17.5
-		}
-	]
+	"store_name": "PetHeaven"
 }
 ```
 HTTP verb
@@ -564,7 +645,7 @@ Path or route
 ```
 #### Response
 Code 200 OK
-```
+```json
 [
   {
     "id": 0,
@@ -572,58 +653,101 @@ Code 200 OK
     "store_location": "string",
     "petitems": [
       {
-        "id": "string",
+        "id": 0,
         "item_name": "string",
         "item_description": "string",
         "price": 0
+      }
+    ],
+    "badges": [
+      {
+        "id": 0,
+        "badge_name": "string",
+        "colour_code": "string",
+        "discount": 0
       }
     ]
   }
 ]
 ```
 #### Example Response
-```
+```json
+
 [
 	{
+		"badges": [],
 		"id": 1,
 		"petitems": [
 			{
-				"id": "1",
+				"id": 1,
 				"item_description": "German Shepherd belt",
 				"item_name": "Dog belt",
-				"price": 35.0
+				"price": 29.75
 			}
 		],
 		"store_location": "Melbourne",
 		"store_name": "Chilly"
 	},
 	{
+		"badges": [
+			{
+				"badge_name": "Bird food items",
+				"colour_code": "Orange",
+				"discount": 15.0,
+				"id": 1
+			},
+			{
+				"badge_name": "Dog food items",
+				"colour_code": "Green",
+				"discount": 10.0,
+				"id": 2
+			},
+			{
+				"badge_name": "Pet toys",
+				"colour_code": "Yellow",
+				"discount": 15.0,
+				"id": 3
+			},
+			{
+				"badge_name": "Dog collar",
+				"colour_code": "Red",
+				"discount": 5.0,
+				"id": 4
+			}
+		],
 		"id": 2,
 		"petitems": [
 			{
-				"id": "2",
+				"id": 2,
 				"item_description": "Bird feeding stand",
 				"item_name": "Bird feeder",
 				"price": 42.5
+			},
+			{
+				"id": 7,
+				"item_description": "Pet Swimming assist",
+				"item_name": "Pet Swimming assist",
+				"price": 17.5
+			},
+			{
+				"id": 8,
+				"item_description": "Bird feed food item",
+				"item_name": "Bird feed food",
+				"price": 77.5
 			}
 		],
 		"store_location": "Brisbane",
 		"store_name": "HappyPet"
 	},
 	{
-		"id": 4,
-		"petitems": [
-			{
-				"id": "4",
-				"item_description": "Food and Water Dispenser",
-				"item_name": "Food and Water Bowl",
-				"price": 17.5
-			}
-		],
+		"badges": [],
+		"id": 6,
+		"petitems": [],
 		"store_location": "Melboure",
-		"store_name": "PetHeaven"
+		"store_name": "Pet shop"
 	}
 ]
+		
 ```
 
 HTTP verb
@@ -634,46 +758,99 @@ Path or route
 ```
 #### Example Path
 ```
-/store/4
+/store/2
 ```
 #### Response
 #### When Successful
 Code 200 OK
-```
+```json
 {
   "id": 0,
   "store_name": "string",
   "store_location": "string",
   "petitems": [
     {
-      "id": "string",
+      "id": 0,
       "item_name": "string",
       "item_description": "string",
       "price": 0
+    }
+  ],
+  "badges": [
+    {
+      "id": 0,
+      "badge_name": "string",
+      "colour_code": "string",
+      "discount": 0
     }
   ]
 }
 ```
 #### Example Response
-```
+```json
 {
-	"id": 4,
-	"petitems": [
+	"badges": [
 		{
-			"id": "4",
-			"item_description": "Food and Water Dispenser",
-			"item_name": "Food and Water Bowl",
-			"price": 17.5
+			"badge_name": "Bird food items",
+			"colour_code": "Orange",
+			"discount": 15.0,
+			"id": 1
+		},
+		{
+			"badge_name": "Dog food items",
+			"colour_code": "Green",
+			"discount": 10.0,
+			"id": 2
+		},
+		{
+			"badge_name": "Pet toys",
+			"colour_code": "Yellow",
+			"discount": 15.0,
+			"id": 3
+		},
+		{
+			"badge_name": "Dog collar",
+			"colour_code": "Red",
+			"discount": 5.0,
+			"id": 4
 		}
 	],
-	"store_location": "Melboure",
-	"store_name": "PetHeaven"
+	"id": 2,
+	"petitems": [
+		{
+			"id": 2,
+			"item_description": "Bird feeding stand",
+			"item_name": "Bird feeder",
+			"price": 42.5
+		},
+		{
+			"id": 7,
+			"item_description": "Pet Swimming assist",
+			"item_name": "Pet Swimming assist",
+			"price": 17.5
+		},
+		{
+			"id": 8,
+			"item_description": "Bird feed food item",
+			"item_name": "Bird feed food",
+			"price": 77.5
+		}
+	],
+	"store_location": "Brisbane",
+	"store_name": "HappyPet"
 }
 ```
 #### Response
 #### When Not Found
 #### Code 404 NOT FOUND
+```json
+{
+	"code": 404,
+	"status": "Not Found"
+}
 ```
+#### Example Response
+```json
 {
 	"code": 404,
 	"status": "Not Found"
@@ -693,7 +870,7 @@ Path or route
 #### Response
 #### When Successful
 #### Code 200 OK 
-```
+```json
 {
 	"message": "Pet Store deleted"
 }
