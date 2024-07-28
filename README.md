@@ -8,6 +8,11 @@ https://github.com/ChalaniDissanayaka/PetStoreAPI
 Trello Board URL 
 https://trello.com/b/V7dw2MOe/pet-shop-flask-api
 
+OPENAPI SWAGGER Documentation
+http://127.0.0.1:5000/swagger-ui
+
+![swagger-ui-petitems](./docs/swagger_ui_pet_item.png)
+![swagger-ui-badges](./docs/swagger_ui_badge.png)
 
 ### PET STORE API using Flask, PostgreSQL Database and JWT.
 ### Set up instructions for python environment, PostgreSQL Database and run the PET STORE API 
@@ -141,32 +146,63 @@ Furthermore, The Pet Store API supports businesses by providing a robust system 
 
 ### Admin Stories
 
-    - Store Management:
-       - Create, read, update and delete pet store to maintain the Pet Store effectively.
+- Store Management:
+  - Create, read, update and delete pet store to maintain the Pet Store effectively.
 
-    - Pet Item Management:
-       - Create, read, update and delete pet items to control inventory and keep track of available items.
+- Pet Item Management:
+  - Create, read, update and delete pet items to control inventory and keep track of available items.
 
-    - Discount Management:
-       - Add discounts to pet items based on badges (Example - Blue, Green, Orange) to promote specific items with special offers.
+- Discount Management:
+  - Add discounts to pet items based on badges (Example - Blue, Green, Orange) to promote specific items with special offers.
 
 ### Customer Stories
 
-    - Account Management:
-       - Sign up for an account to access and use the Pet Store API.
-       - Log in to securely access personalized features and perform actions.
+- Account Management:
+  - Sign up for an account to access and use the Pet Store API.
+  - Log in to securely access personalized features and perform actions.
 
-    - Pet Item Browsing:
-       - Browse all available pet items in the pet store to explore the variety of items offered.
-       - View details of specific pet item. It should include name, description, price and discounts. The details will help to make informed purchase decisions.
+- Pet Item Browsing:
+  - Browse all available pet items in the pet store to explore the variety of items offered.
+  - View details of specific pet item. It should include name, description, price and discounts. The details will help to make informed purchase decisions.
 
-    - Reviews and Ratings:
-       - Leave reviews and ratings for purchased pet items to share experiences and help other customers.
+- Reviews and Ratings:
+  - Leave reviews and ratings for purchased pet items to share experiences and help other customers.
 
 These user stories outline the essential functionalities required for both Admin and Customer roles within the Pet Store API. Pet Store API is addressing specific actions and facilitate tailored functionalities to each user's needs in managing and interacting with the pet store web application.
 
-## R3: List and explain the third-party services, packages and dependencies used in this app.
+## R2: Describe the way tasks are allocated and tracked in your project.
 
+### Trello Board URL 
+https://trello.com/b/V7dw2MOe/pet-shop-flask-api
+
+   - Added 4 columns in the Trello Board. Todo, In Progress, API Testing and Done. 
+   - Split the Pet Store REST API project to manageable cards. 
+   - Added the detailed task description to the cards.
+   - Split the Pet Store REST API project to 17 cards. 
+   - Prioritise the cards and made an order. 
+   - Colour code the card according to the card type. 
+     - Example - feature card - Green, documentation card - Blue.
+   - Allocate an estimate time for each card.
+   - Created git branches according to the task.
+     - feature-PETSTORE-1002-Create-Blueprint-for-stores-and-pet_items
+     - feature-PETSTORE-1003-Add-marshmallow-schemas-for-stores-and-pet_items
+     - feature-PETSTORE-1004-Create-SQLAlchemy-model-for-stores-and-pet_items
+     - feature-PETSTORE-1005-Create-SQLAlchemy-model-for-badges
+     - feature-PETSTORE-1006-Create-SQLAlchemy-model-for-badges-and-pet_items
+     - feature-PETSTORE-1007-User-Authentication-with-JWT
+     - documentation-PETSTORE-2001-Store-endpoint
+     - documentation-PETSTORE-2002-PetItem-endpoints-and-Badge-endpoints
+     - documentation-PETSTORE-2003-Badge-endpoints-and-project-task-plan
+   - Moved the card to each column and track the progress. 
+   - Created Pull request for each branch. 
+   - Merged the pull request to main branch when approved. 
+   - Pull the changes to local main branch and created the new branch from main branch.
+   - Followed the same process when handling git branches.
+   - Manually Tested each and every endpoint in Pet Store REST API. 
+   - Moved the card as Done After Manual test passed. 
+   - Documentation tasks took longer than allocated estimated time.
+
+## R3: List and explain the third-party services, packages and dependencies used in this app.
 
 ## Flask-Smorest
 Using Flask-Smorest for a Pet Store REST API offers many advantages. 
@@ -1260,5 +1296,292 @@ Path or route
 {
 	"code": 404,
 	"status": "Not Found"
+}
+```
+## Badges
+#### Operations on badges - jwt token required
+
+HTTP verb
+### POST
+Path or route
+```
+/store/{store_id}/badge
+```
+Any required body data
+#### Request body
+```json
+{
+  "badge_name": "string",
+  "colour_code": "string",
+  "discount": 0,
+  "store_id": 0
+}
+```
+#### Example Path
+```
+/store/1/badge
+```
+Any required body data
+#### Request body
+```json
+{
+	"badge_name": "Cat items",
+	"colour_code": "Orange",
+	"discount": 10.00
+}
+```
+#### Example Response
+#### When Successful
+Code 201 CREATED
+```json
+{
+	"badge_name": "Cat items",
+	"colour_code": "Orange",
+	"discount": 10.0,
+	"id": 6,
+	"petitems": [],
+	"store": {
+		"id": 1,
+		"store_location": "Melbourne",
+		"store_name": "Chilly"
+	}
+}
+```
+### When We try to POST Existing Badge
+HTTP verb
+### POST
+Path or route
+```
+/store/{store_id}/badge
+/store/1/badge
+```
+Any required body data
+#### Request body
+```json
+{
+	"badge_name": "Cat items",
+	"colour_code": "Orange",
+	"discount": 10.00
+}
+```
+#### Example Response - When record already exists
+400 BAD REQUEST 
+```json
+{
+	"code": 400,
+	"message": "A badge with the provided name already exists in the pet store.",
+	"status": "Bad Request"
+}
+```
+
+HTTP verb
+### GET
+Path or route
+```
+/store/{store_id}/badge
+```
+#### Example Path
+```
+/store/1/badge
+```
+#### Response
+#### When Successful
+Code 200 OK
+```json
+[
+  {
+    "id": 0,
+    "badge_name": "string",
+    "colour_code": "string",
+    "discount": 0,
+    "store": {
+      "id": 0,
+      "store_name": "string",
+      "store_location": "string"
+    },
+    "petitems": [
+      {
+        "id": 0,
+        "item_name": "string",
+        "item_description": "string",
+        "price": 0
+      }
+    ]
+  }
+]
+```
+#### Example Response
+#### When Successful
+#### Code 200 OK 
+```json
+[
+	{
+		"badge_name": "Cat items",
+		"colour_code": "Orange",
+		"discount": 10.0,
+		"id": 6,
+		"petitems": [],
+		"store": {
+			"id": 1,
+			"store_location": "Melbourne",
+			"store_name": "Chilly"
+		}
+	}
+]
+```
+HTTP verb
+### GET
+Path or route
+```
+/badge/{badge_id}
+```
+#### Example Path
+```
+/badge/1
+```
+#### Response
+#### When Successful
+Code 200 OK
+```json
+{
+  "id": 0,
+  "badge_name": "string",
+  "colour_code": "string",
+  "discount": 0,
+  "store": {
+    "id": 0,
+    "store_name": "string",
+    "store_location": "string"
+  },
+  "petitems": [
+    {
+      "id": 0,
+      "item_name": "string",
+      "item_description": "string",
+      "price": 0
+    }
+  ]
+}
+```
+#### Example Response
+#### When Successful
+#### Code 200 OK
+```json
+{
+	"badge_name": "Bird food items",
+	"colour_code": "Orange",
+	"discount": 15.0,
+	"id": 1,
+	"petitems": [
+		{
+			"id": 2,
+			"item_description": "Bird feeding stand",
+			"item_name": "Bird feeder",
+			"price": 42.5
+		}
+	],
+	"store": {
+		"id": 2,
+		"store_location": "Brisbane",
+		"store_name": "HappyPet"
+	}
+}
+```
+
+#### POST
+#### /pet_item/{pet_item_id}/badge/{badge_id}
+
+Link a pet_item in a store with a badge from the same store.
+#### HTTP verb
+### POST
+Path or route
+```
+/pet_item/{pet_item_id}/badge/{badge_id}
+```
+#### Example Path
+```
+/pet_item/11/badge/3
+```
+#### Example Response
+#### When Successful
+Code 201 CREATED
+```json
+{
+	"badge_name": "Pet toys",
+	"colour_code": "Yellow",
+	"discount": 15.0,
+	"id": 3,
+	"petitems": [
+		{
+			"id": 11,
+			"item_description": "Magic Nail Clipper Small/ Medium",
+			"item_name": "Nail Clipper",
+			"price": 57.5
+		}
+	],
+	"store": {
+		"id": 2,
+		"store_location": "Brisbane",
+		"store_name": "HappyPet"
+	}
+}
+```
+### PostgreSQL Database
+![PostgreSQL](./docs/PostgreSQL.png)
+#### Example Path
+```
+/pet_item/11/badge/3
+```
+#### Linked a pet_item = 11 in a store_id =2 with a badge_id = 3 from the same store, store_id =2.
+
+
+HTTP verb
+### DELETE
+#### Unlink a badge from a pet_item
+Path or route
+```
+/pet_item/{pet_item_id}/badge/{badge_id}
+```
+#### Example Path
+```
+/pet_item/8/badge/5
+```
+#### Example Response
+#### When Successful
+Code 200 OK
+```json
+{
+	"badge": {
+		"badge_name": "home",
+		"colour_code": "Orange",
+		"discount": 10.0,
+		"id": 5,
+		"petitems": [],
+		"store": {
+			"id": 2,
+			"store_location": "Brisbane",
+			"store_name": "HappyPet"
+		}
+	},
+	"message": "Pet Item removed from the badge"
+}
+```
+HTTP verb
+### DELETE
+#### Delete a badge. Badge should not have associated pet_items.
+Path or route
+```
+/badge/{badge_id}
+```
+#### Example Path
+```
+/badge/5
+```
+#### Example Response
+#### When Successful
+Code 202 ACCEPTED
+```json
+{
+  "message": "Badge deleted."
 }
 ```
