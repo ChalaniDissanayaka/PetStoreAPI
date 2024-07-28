@@ -297,7 +297,7 @@ The primary purpose of using SQLAlchemy in the Pet Store REST API is to streamli
 SQLAlchemy usage in the Pet Store REST API simplifies the interaction with the database by providing a high-level, Pythonic interface for managing database records.
 It offers robust features for ORM, query construction and session management. It makes a great choice for building scalable and maintainable web based applications.
 
-## R6: Design an entity relationship diagram (ERD) for this app’s database, and explain how the relations between the diagrammed models will aid the database design. 
+## R6: Design an entity relationship diagram (ERD) for Pet Store REST API app database, and explain how the relations between the diagrammed models will aid the database design. 
 
 ### Database design BEFORE coding started - The project planning phase.
 
@@ -318,7 +318,8 @@ attach the diagram here.
 2. In many-to-many relationship, one model could not have a single value as a foreign key.
    So we need another table (a secondary table) that has, in each row, a Badge ID and PetItem ID.
 
-3. As an Example - Entity Name - petitem_badge
+3. As an Example - 
+
    Entity Name - petitem_badge
    Table name - petitems_badges
    ```
@@ -344,9 +345,161 @@ attach the diagram here.
 6. This is how many-to-many relationships work. It is through the above secondary table. The Badge.petitems and PetItem.badges attributes will be populated by SQLAlchemy.
 7. The rows in this table keep a link between a specific badge and a specific petitem.
    But without the need for those values to be stored in the badge or petitem models themselves.
+### One-to-many Relationship between Stores and PetItems
+
+   - One-to-many relationship between Store and PetItems
+   - One Store can have many PetItems
+   - Each PetItem has one Store
+
+### One-to-many Relationship between Stores and Badges
+
+   - One Store can have many Badges
+   - Each Badge has one Store
+
+### One-to-many Relationship between Stores and Users
+
+   - One Store can have many Users
+   - Each User has one Store
+
+## R7: Explain the implemented models and their relationships, including how the relationships aid the database implementation.
+
+### Database implementation AFTER coding has started - The project development phase of Pet Store REST API.
+
+The models used in Pet Store REST API are in different files within the models folder. 
+
+`StoreModel`
+```python
+class StoreModel(db.Model):
+    __tablename__ = "stores"
+
+    id = db.Column(db.Integer, primary_key=True)
+    store_name = db.Column(db.String(80), unique=True, nullable=False)
+    store_location = db.Column(db.String(100), unique=True, nullable=False)
+
+    petitems = db.relationship("PetItemModel", back_populates="store", lazy="dynamic", cascade="all, delete")
+    badges = db.relationship("BadgeModel", back_populates="store", lazy="dynamic")
+```
+#### One-to-many Relationship between Stores and PetItems
+
+   - One-to-many relationship between Store and PetItems
+   - One Store can have many PetItems
+   - Each PetItem has one Store
+
+#### One-to-many Relationship between Stores and Badges
+
+   - One Store can have many Badges
+   - Each Badge has one Store
+
+#### The above code snippet db.relationship command defines the relationship between the models in the Pet Store REST API
+
+```python
+petitems = db.relationship("PetItemModel", back_populates="store", lazy="dynamic", cascade="all, delete")
+```
+   - One Store can have many PetItems
+   - Each PetItem belongs to a single store. 
+   - If we want to delete a store which has attached petitems then it won't allow us to delete the store. 
+   - When we delete a model that has a relationship to other models that still exist, then the default behavior in SQLAlchemy with PostgreSQL is to raise an error. 
+   - This is because SQLAlchemy does not want to allow us to accidentally delete data that is still being used by other models.
+   - Let's say we have a store 1 that has two petitems, petitem 1 and petitem 2. 
+   - If we try to delete store 1 without first deleting petitem 1 and petitem 2, SQLAlchemy will raise an error because the petitems are still attached to the store.
+   - This means the petitems have a Foreign Key that references the store we are trying to delete. If the store actually was deleted, then the petitems have a store ID that references something that doesn't exist.
+   - To fix the issue, we can use a feature called "cascading deletes". Cascading deletes allow us to specify that when a model is deleted, any related models should also be deleted automatically.
 
 
-### stores 
+`PetItemModel`
+```python
+class PetItemModel(db.Model):
+    __tablename__ = "petitems"
+
+    id = db.Column(db.Integer, primary_key=True)
+    item_name = db.Column(db.String(80), unique=True, nullable=False)
+    item_description = db.Column(db.String(100))
+    price = db.Column(db.Float(precision=2), unique=False, nullable=False)
+    store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), unique=False, nullable=False)
+
+    store = db.relationship("StoreModel", back_populates="petitems")
+    badges = db.relationship("BadgeModel", back_populates="petitems", secondary="petitems_badges")
+```
+#### One-to-many Relationship between Stores and PetItems
+
+   - One-to-many relationship between Store and PetItems
+   - One Store can have many PetItems
+   - Each PetItem has one Store
+   - store_id ForeignKey references stores table
+
+`BadgeModel`
+```python
+class BadgeModel(db.Model):
+    __tablename__ = "badges"
+
+    id = db.Column(db.Integer, primary_key=True)
+    badge_name = db.Column(db.String(80), unique=True, nullable=False)
+    colour_code = db.Column(db.String(20), unique=False, nullable=False)
+    discount = db.Column(db.Float(precision=2), unique=False, nullable=False)
+    store_id = db.Column(db.Integer, db.ForeignKey("stores.id"), nullable=False)
+
+    store = db.relationship("StoreModel", back_populates="badges")
+    petitems = db.relationship("PetItemModel", back_populates="badges", secondary="petitems_badges")
+```
+#### One-to-many Relationship between Stores and Badges
+
+   - One Store can have many Badges
+   - Each Badge has one Store
+   - store_id ForeignKey references stores table
+
+`PetItemBadgeModel`
+```python
+class PetItemBadgeModel(db.Model):
+    __tablename__ = "petitems_badges"
+
+    id = db.Column(db.Integer, primary_key=True)
+    petitem_id = db.Column(db.Integer, db.ForeignKey("petitems.id"))
+    badge_id = db.Column(db.Integer, db.ForeignKey("badges.id"))
+```
+#### many-to-many relationship between PetItem and Badge
+1. Relationship between Badges and PetItems
+
+   - One PetItem can have many badges
+   - One Badge can have many PetItems
+
+2. In many-to-many relationship, one model could not have a single value as a foreign key.
+   So we need another table (a secondary table) that has, in each row, a Badge ID and PetItem ID.
+
+3. As an Example - 
+
+   Entity Name - petitem_badge
+   Table name - petitems_badges
+   ```
+   id , badge_id, petitem_id
+   1      2          3
+   2      2          4
+   3      4          1
+   4      3          1
+   ```
+4. ForeignKey references
+
+   - petitem_id ForeignKey references petitems table
+   - badge_id ForeignKey references badges table
+
+`UserModel`
+```python
+class UserModel(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+    password = db.Column(db.String, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+```
+#### One-to-many Relationship between Stores and Users
+
+   - One Store can have many Users
+   - Each User has one Store
+
+## R8: Explain how to use Pet Store REST API endpoints. Each endpoint should be explained.
+
+## stores 
 #### Operations on pet stores
 HTTP verb
 ### POST
